@@ -63,110 +63,114 @@ export function VoiceRecorder({
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`
 
   return (
-    <section className="flex flex-col items-center gap-8" id="dashboard">
-      {/* Section header */}
+    <section className="relative flex flex-col items-center gap-8 py-10 animate-fadeIn">
+
+      {/* Background glow */}
+      <div className="bg-glow left-0 bg-primary"></div>
+      <div className="bg-glow right-0 bg-accent"></div>
+
+      {/* Header */}
       <div className="text-center">
         <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary">
           Voice Analysis
         </p>
-        <h2
-          className="text-3xl font-bold tracking-tight text-foreground md:text-4xl"
-          style={{ fontFamily: "var(--font-heading)" }}
-        >
+        <h2 className="text-3xl font-bold md:text-4xl font-heading">
           Record Your Voice
         </h2>
-        <p className="mt-3 max-w-md text-base text-muted-foreground leading-relaxed">
-          {
-            'Read the sentence aloud: "The rainbow appeared after the gentle rain stopped falling."'
-          }
+        <p className="mt-3 max-w-md text-muted-foreground">
+          Read aloud: "The rainbow appeared after the gentle rain stopped falling."
         </p>
       </div>
 
-      {/* Waveform card */}
-      <div className="w-full max-w-2xl rounded-2xl border border-border/60 bg-card p-8 shadow-sm">
-        {/* Timer */}
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {state === "recording" && (
-              <span className="relative flex h-3 w-3">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500" />
-              </span>
-            )}
-            <span className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              {state === "idle"
-                ? "Ready"
-                : state === "recording"
+      {/* Gradient Border */}
+      <div className="relative p-[1px] rounded-3xl bg-gradient-to-r from-primary via-accent to-chart-2 animate-gradient">
+
+        {/* Glass Card */}
+        <div className="w-full max-w-2xl rounded-3xl glass-card shadow-3d p-8 hover-3d">
+
+          {/* Timer */}
+          <div className="mb-6 flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              {state === "recording" && (
+                <span className="relative flex h-3 w-3">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75" />
+                  <span className="relative inline-flex h-3 w-3 rounded-full bg-destructive" />
+                </span>
+              )}
+              <span className="text-sm font-semibold uppercase text-muted-foreground">
+                {state === "idle"
+                  ? "Ready"
+                  : state === "recording"
                   ? "Recording"
                   : "Complete"}
+              </span>
+            </div>
+
+            <span className="font-mono text-2xl font-bold">
+              {formatTime(elapsed)}
             </span>
           </div>
-          <span
-            className="font-mono text-2xl font-bold tabular-nums text-foreground"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            {formatTime(elapsed)}
-          </span>
-        </div>
 
-        {/* Waveform */}
-        <div className="flex h-32 items-center justify-center gap-[3px] rounded-xl bg-muted/50 px-4">
-          {bars.map((h, i) => (
-            <div
-              key={i}
-              className="w-[3px] rounded-full transition-all duration-75"
-              style={{
-                height: `${h * 100}%`,
-                backgroundColor:
-                  state === "recording"
-                    ? `oklch(0.55 0.12 ${200 + i * 1.2})`
-                    : state === "done"
-                      ? "oklch(0.72 0.1 168)"
-                      : "oklch(0.85 0.01 220)",
-                opacity: state === "recording" ? 0.9 : 0.4,
-                boxShadow:
-                  state === "recording"
-                    ? `0 0 8px oklch(0.55 0.12 230 / 0.3)`
-                    : "none",
-              }}
-            />
-          ))}
-        </div>
+          {/* Waveform */}
+          <div className="flex h-32 items-center justify-center gap-[3px] rounded-xl bg-muted/40 px-4">
+            {bars.map((h, i) => (
+              <div
+                key={i}
+                className={`w-[3px] rounded-full transition-all duration-75 ${
+                  state === "recording" ? "glow-primary" : ""
+                }`}
+                style={{
+                  height: `${h * 100}%`,
+                  background:
+                    state === "recording"
+                      ? "linear-gradient(to top, var(--color-primary), var(--color-accent))"
+                      : "var(--color-muted-foreground)",
+                  opacity: state === "recording" ? 1 : 0.4,
+                }}
+              />
+            ))}
+          </div>
 
-        {/* Controls */}
-        <div className="mt-8 flex items-center justify-center gap-4">
-          {state === "idle" && (
-            <Button
-              onClick={startRecording}
-              size="lg"
-              className="h-16 gap-3 rounded-2xl bg-primary px-10 text-lg font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
-            >
-              <Mic className="h-6 w-6" />
-              Start Recording
-            </Button>
-          )}
-          {state === "recording" && (
-            <Button
-              onClick={stopRecording}
-              size="lg"
-              variant="destructive"
-              className="h-16 gap-3 rounded-2xl bg-red-500 px-10 text-lg font-bold text-card shadow-lg shadow-red-500/20 transition-all hover:bg-red-600 hover:shadow-xl"
-            >
-              <Square className="h-5 w-5" />
-              Stop Recording
-            </Button>
-          )}
-          {state === "done" && (
-            <Button
-              onClick={resetRecording}
-              size="lg"
-              variant="outline"
-              className="h-14 gap-3 rounded-2xl border-border px-8 text-base font-semibold text-foreground hover:bg-muted"
-            >
-              <RotateCcw className="h-5 w-5" />
-              Record Again
-            </Button>
-          )}
+          {/* Controls */}
+          <div className="mt-8 flex justify-center gap-4">
+            {state === "idle" && (
+              <Button
+                onClick={startRecording}
+                size="lg"
+                className="h-16 gap-3 rounded-2xl bg-primary text-primary-foreground px-10 text-lg font-bold shadow-3d hover-3d"
+              >
+                <Mic className="h-6 w-6" />
+                Start Recording
+              </Button>
+            )}
+
+            {state === "recording" && (
+              <div className="relative">
+                <span className="absolute inset-0 rounded-2xl animate-ping bg-destructive opacity-30"></span>
+
+                <Button
+                  onClick={stopRecording}
+                  size="lg"
+                  className="relative h-16 gap-3 rounded-2xl bg-destructive text-white px-10 text-lg font-bold shadow-3d"
+                >
+                  <Square className="h-5 w-5" />
+                  Stop Recording
+                </Button>
+              </div>
+            )}
+
+            {state === "done" && (
+              <Button
+                onClick={resetRecording}
+                size="lg"
+                variant="outline"
+                className="h-14 gap-3 rounded-2xl px-8 hover-3d"
+              >
+                <RotateCcw className="h-5 w-5" />
+                Record Again
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </section>
